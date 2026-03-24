@@ -20,6 +20,20 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect('Content-Type', /json/)
+      .expect((res) => {
+        const body = res.body as {
+          success: boolean;
+          data: string;
+          timestamp: string;
+        };
+
+        expect(body).toMatchObject({
+          success: true,
+          data: 'Hello World!',
+        });
+        expect(typeof body.timestamp).toBe('string');
+        expect(Number.isNaN(Date.parse(body.timestamp))).toBe(false);
+      });
   });
 });
