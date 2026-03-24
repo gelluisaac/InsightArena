@@ -4,6 +4,7 @@ pub mod config;
 pub mod errors;
 pub mod escrow;
 pub mod market;
+pub mod prediction;
 pub mod storage_types;
 
 pub use crate::config::Config;
@@ -11,7 +12,7 @@ pub use crate::errors::InsightArenaError;
 pub use crate::market::CreateMarketParams;
 pub use crate::storage_types::{DataKey, InviteCode, Market, Prediction, Season, UserProfile};
 
-use soroban_sdk::{contract, contractimpl, Address, Env, Vec};
+use soroban_sdk::{contract, contractimpl, Address, Env, Symbol, Vec};
 
 #[contract]
 pub struct InsightArenaContract;
@@ -115,6 +116,24 @@ impl InsightArenaContract {
         market_id: u64,
     ) -> Result<(), InsightArenaError> {
         market::cancel_market(&env, caller, market_id)
+    }
+
+    // ── Prediction ────────────────────────────────────────────────────────────
+
+    /// Submit a prediction for an open market by staking XLM on a chosen outcome.
+    ///
+    /// The predictor selects one of the market's valid `outcome_options` and
+    /// locks `stake_amount` stroops of XLM into escrow. Returns `AlreadyPredicted`
+    /// if the same address has already staked on this market. Emits a
+    /// `PredictionSubmitted` event on success.
+    pub fn submit_prediction(
+        env: Env,
+        predictor: Address,
+        market_id: u64,
+        chosen_outcome: Symbol,
+        stake_amount: i128,
+    ) -> Result<(), InsightArenaError> {
+        prediction::submit_prediction(&env, predictor, market_id, chosen_outcome, stake_amount)
     }
 }
 
