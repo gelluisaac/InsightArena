@@ -51,7 +51,11 @@ describe('JwtAuthGuard', () => {
 
     it('throws 401 with "Token expired" for expired tokens', () => {
       expect(() =>
-        guard.handleRequest(null, null, new TokenExpiredError('jwt expired', new Date())),
+        guard.handleRequest(
+          null,
+          null,
+          new TokenExpiredError('jwt expired', new Date()),
+        ),
       ).toThrow(new UnauthorizedException('Token expired'));
     });
 
