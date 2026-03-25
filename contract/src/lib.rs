@@ -166,6 +166,19 @@ impl InsightArenaContract {
     pub fn list_market_predictions(env: Env, market_id: u64) -> Vec<Prediction> {
         prediction::list_market_predictions(&env, market_id)
     }
+
+    /// Claim a resolved-market payout for `predictor`.
+    ///
+    /// Reverts when the market is unresolved, the caller did not predict the
+    /// winning outcome, or a payout for this `(market_id, predictor)` has
+    /// already been claimed.
+    pub fn claim_payout(
+        env: Env,
+        predictor: Address,
+        market_id: u64,
+    ) -> Result<i128, InsightArenaError> {
+        prediction::claim_payout(&env, predictor, market_id)
+    }
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

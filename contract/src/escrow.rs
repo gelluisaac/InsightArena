@@ -38,3 +38,21 @@ pub fn refund(env: &Env, recipient: &Address, amount: i128) -> Result<(), Insigh
     );
     Ok(())
 }
+
+/// Release a winner payout from contract escrow to `predictor`.
+///
+/// This is semantically distinct from `refund` (used for market cancellation),
+/// but uses the same escrow transfer path from contract balance to recipient.
+pub fn release_payout(
+    env: &Env,
+    predictor: &Address,
+    amount: i128,
+) -> Result<(), InsightArenaError> {
+    let cfg = config::get_config(env)?;
+    token::Client::new(env, &cfg.xlm_token).transfer(
+        &env.current_contract_address(),
+        predictor,
+        &amount,
+    );
+    Ok(())
+}
