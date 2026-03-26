@@ -4,6 +4,7 @@ pub mod config;
 pub mod errors;
 pub mod escrow;
 pub mod market;
+pub mod oracle;
 pub mod prediction;
 pub mod storage_types;
 
@@ -31,6 +32,30 @@ impl InsightArenaContract {
         xlm_token: Address,
     ) -> Result<(), InsightArenaError> {
         config::initialize(&env, admin, oracle, fee_bps, xlm_token)
+    }
+
+    /// Transition a market into the "resolved" state by recording the winning outcome.
+    ///
+    /// Validation order:
+    /// 1. `oracle` address must provide valid cryptographic authorisation.
+    /// 2. `oracle` must match the `oracle_address` stored in global configuration.
+    /// 3. Market must exist in persistent storage.
+    /// 4. `current_time >= market.resolution_time` — resolution window must be open.
+    /// 5. `market.is_resolved == false` — prevents double-resolution.
+    /// 6. `resolved_outcome` must be one of the symbols in `market.outcome_options`.
+    ///
+    /// On success:
+    /// - `market.is_resolved` is set to `true`.
+    /// - `market.resolved_outcome` stores the winning `Symbol`.
+    /// - The updated record is saved to storage and its TTL is extended.
+    /// - A `MarketResolved` event is emitted.
+    pub fn resolve_market(
+        env: Env,
+        oracle: Address,
+        market_id: u64,
+        resolved_outcome: Symbol,
+    ) -> Result<(), InsightArenaError> {
+        oracle::resolve_market(env, oracle, market_id, resolved_outcome)
     }
 
     // ── Config read ───────────────────────────────────────────────────────────

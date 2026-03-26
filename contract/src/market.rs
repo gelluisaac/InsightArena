@@ -83,6 +83,13 @@ fn emit_market_cancelled(env: &Env, market_id: u64, caller: &Address) {
     );
 }
 
+pub fn emit_market_resolved(env: &Env, market_id: u64, resolved_outcome: Symbol) {
+    env.events().publish(
+        (symbol_short!("mkt"), symbol_short!("reslvd")),
+        (market_id, resolved_outcome),
+    );
+}
+
 // ── Entry-point logic ─────────────────────────────────────────────────────────
 
 /// Create a new prediction market and return its auto-assigned `market_id`.
